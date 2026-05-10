@@ -3,7 +3,7 @@
 import type { Skill } from "@/lib/types";
 import { SKILL_ICON_OPTIONS } from "@/lib/skill-icons";
 import { SkillGlyph } from "@/components/skill-glyph";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const inputClass =
   "mt-1 w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--accent)_45%,transparent)]";
@@ -214,7 +214,7 @@ export function SkillsAdmin({ initial }: { initial: Skill[] }) {
             <ul className="mt-3 space-y-3">
               {items.map((s) => (
                 <SkillRow
-                  key={s.id}
+                  key={`${s.id}:${s.name}:${s.category}:${s.proficiency}:${s.sinceYear}:${s.icon}`}
                   skill={s}
                   maxYear={maxYear}
                   onSave={saveRow}
@@ -254,14 +254,6 @@ function SkillRow({
     skill.sinceYear > 0 ? String(skill.sinceYear) : "",
   );
   const [icon, setIcon] = useState(skill.icon);
-
-  useEffect(() => {
-    setName(skill.name);
-    setCategory(skill.category);
-    setProficiency(skill.proficiency);
-    setSinceYearStr(skill.sinceYear > 0 ? String(skill.sinceYear) : "");
-    setIcon(skill.icon);
-  }, [skill]);
 
   const parsedSince = parseSinceYear(sinceYearStr, maxYear);
   const sinceOk = parsedSince !== null;

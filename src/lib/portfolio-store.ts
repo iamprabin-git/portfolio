@@ -479,6 +479,9 @@ export function pendingProjectFeedback(items: ProjectFeedback[]): ProjectFeedbac
 }
 
 function ensureFile(): void {
+  if (process.env.VERCEL) {
+    return;
+  }
   const dir = path.dirname(DATA_PATH);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -489,9 +492,22 @@ function ensureFile(): void {
 }
 
 function readPortfolioFromDisk(): PortfolioData {
-  ensureFile();
-  const raw = fs.readFileSync(DATA_PATH, "utf-8");
-  return normalizePortfolio(JSON.parse(raw) as unknown);
+  if (!fs.existsSync(DATA_PATH)) {
+    if (process.env.VERCEL) {
+      console.warn(
+        "[portfolio-store] data/portfolio.json missing on serverless host; using embedded defaults.",
+      );
+      return normalizePortfolio(defaultData);
+    }
+    ensureFile();
+  }
+  try {
+    const raw = fs.readFileSync(DATA_PATH, "utf-8");
+    return normalizePortfolio(JSON.parse(raw) as unknown);
+  } catch (err) {
+    console.error("[portfolio-store] Failed to read or parse portfolio JSON:", err);
+    return normalizePortfolio(defaultData);
+  }
 }
 
 function writePortfolioToDisk(data: PortfolioData): void {
@@ -532,16 +548,26 @@ async function writePortfolioToMongo(data: PortfolioData): Promise<void> {
 export async function readPortfolio(): Promise<PortfolioData> {
   if (isMongoConfigured()) {
     try {
-      let data = await readPortfolioFromMongo();
+      const data = await readPortfolioFromMongo();
       if (!data) {
         const seed = readPortfolioFromDisk();
-        await writePortfolioToMongo(seed);
-        data = seed;
+        try {
+          await writePortfolioToMongo(seed);
+        } catch (seedErr) {
+          console.error(
+            "[portfolio-store] MongoDB seed upsert failed (site still loads from seed):",
+            seedErr,
+          );
+        }
+        return seed;
       }
       return data;
     } catch (err) {
-      console.error("[portfolio-store] MongoDB read failed:", err);
-      throw err;
+      console.error(
+        "[portfolio-store] MongoDB unavailable; falling back to disk or defaults:",
+        err,
+      );
+      return readPortfolioFromDisk();
     }
   }
   return readPortfolioFromDisk();
@@ -552,6 +578,11 @@ export async function writePortfolio(data: PortfolioData): Promise<void> {
   if (isMongoConfigured()) {
     await writePortfolioToMongo(normalized);
     return;
+  }
+  if (process.env.VERCEL) {
+    throw new Error(
+      "Portfolio CMS saves require MONGODB_URI on Vercel (filesystem is read-only). Set env vars and redeploy.",
+    );
   }
   writePortfolioToDisk(normalized);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { TypeAnimation } from "react-type-animation";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 export const HERO_ROTATING_TITLES = [
   "Web Developer",
@@ -31,6 +31,15 @@ function usePrefersReducedMotion() {
   );
 }
 
+function subscribeNoop(onStoreChange: () => void) {
+  void onStoreChange;
+  return () => {};
+}
+
+function useIsClient() {
+  return useSyncExternalStore(subscribeNoop, () => true, () => false);
+}
+
 function pauseSequence(
   titles: readonly string[],
   pauseMs: number,
@@ -41,8 +50,7 @@ function pauseSequence(
 /** Matches [dangolprabin.com.np](https://www.dangolprabin.com.np/): typewriter cycle with pause between phrases. */
 export function HeroRotatingTitle({ className }: { className?: string }) {
   const prefersReducedMotion = usePrefersReducedMotion();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const isClient = useIsClient();
 
   const sequence = useMemo(
     () => pauseSequence(HERO_ROTATING_TITLES, 2000),
@@ -52,7 +60,7 @@ export function HeroRotatingTitle({ className }: { className?: string }) {
   const wrapperClass =
     `inline-block max-w-full overflow-hidden align-bottom font-semibold [font-family:var(--hero-typewriter-font)] ${className ?? "text-[var(--hero-typewriter-color)]"}`;
 
-  if (prefersReducedMotion || !mounted) {
+  if (prefersReducedMotion || !isClient) {
     return (
       <span className={wrapperClass} aria-live="polite">
         {HERO_ROTATING_TITLES[0]}

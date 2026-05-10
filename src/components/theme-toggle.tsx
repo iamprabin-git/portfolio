@@ -1,10 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { THEME_STORAGE_KEY, writeThemeCookie } from "@/lib/theme-shared";
+
+function subscribeNoop(onStoreChange: () => void) {
+  void onStoreChange;
+  return () => {};
+}
+
+function useIsClient() {
+  return useSyncExternalStore(subscribeNoop, () => true, () => false);
+}
+
+function subscribeHtmlClass(onStoreChange: () => void) {
+  if (typeof document === "undefined") return () => {};
+  const root = document.documentElement;
+  const mo = new MutationObserver(onStoreChange);
+  mo.observe(root, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+}
+
+function readDarkFromDom() {
+  return document.documentElement.classList.contains("dark");
+}
 
 function IconSun({ className }: { className?: string }) {
   return (
@@ -42,13 +63,12 @@ function IconMoon({ className }: { className?: string }) {
 }
 
 export function ThemeToggle() {
-  const [mounted, setMounted] = useState(false);
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    setMounted(true);
-    setIsDark(document.documentElement.classList.contains("dark"));
-  }, []);
+  const isClient = useIsClient();
+  const isDark = useSyncExternalStore(
+    subscribeHtmlClass,
+    readDarkFromDom,
+    () => false,
+  );
 
   function toggle() {
     const root = document.documentElement;
@@ -57,7 +77,6 @@ export function ThemeToggle() {
     const pref = nextDark ? "dark" : "light";
     localStorage.setItem(THEME_STORAGE_KEY, pref);
     writeThemeCookie(pref);
-    setIsDark(nextDark);
   }
 
   const label = isDark ? "Switch to light mode" : "Switch to dark mode";
@@ -75,7 +94,7 @@ export function ThemeToggle() {
       )}
       onClick={toggle}
     >
-      {!mounted ? (
+      {!isClient ? (
         <span className="size-4 animate-pulse rounded-sm bg-border sm:size-5" />
       ) : isDark ? (
         <IconSun className="size-[18px] sm:size-5" />

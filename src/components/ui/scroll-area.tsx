@@ -26,8 +26,9 @@ const ScrollArea = React.forwardRef<
 })
 ScrollArea.displayName = "ScrollArea"
 
-function ScrollBar(_props: React.ComponentProps<"div">) {
-  return null
+function ScrollBar(props: React.ComponentProps<"div">) {
+  void props;
+  return null;
 }
 
 export { ScrollArea, ScrollBar }

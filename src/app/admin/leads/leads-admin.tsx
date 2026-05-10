@@ -22,7 +22,7 @@ import {
   prioritySortRank,
   winRatePercent,
 } from "@/lib/leads";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -240,9 +240,10 @@ export function LeadsAdmin({ initial }: { initial: Lead[] }) {
   const [q, setQ] = useState("");
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [statsNow] = useState(() => Date.now());
 
   const stats = useMemo(() => {
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const sevenDaysAgo = statsNow - 7 * 24 * 60 * 60 * 1000;
     const active = activePipelineLeads(items);
     const due = leadsDueForFollowUp(items);
     const inbound7 = leadsInboundSince(items, sevenDaysAgo);
@@ -256,7 +257,7 @@ export function LeadsAdmin({ initial }: { initial: Lead[] }) {
       inbound7Count: inbound7.length,
       winRate: wr === null ? "—" : `${wr}%`,
     };
-  }, [items]);
+  }, [items, statsNow]);
 
   const filtered = useMemo(() => {
     let list = [...items];
@@ -794,7 +795,7 @@ export function LeadsAdmin({ initial }: { initial: Lead[] }) {
       </Card>
 
       <LeadDetailDialog
-        key={activeLead?.id ?? "closed"}
+        key={activeLead ? adminLeadStableKey(activeLead) : "closed"}
         lead={activeLead}
         open={activeLead !== null}
         onOpenChange={(o) => !o && setActiveLead(null)}
@@ -977,6 +978,30 @@ function ManualLeadCard({
   );
 }
 
+/** Include editable fields so the dialog remounts after PATCH refreshes `lead` while preserving stable keys while typing. */
+function adminLeadStableKey(l: Lead): string {
+  return [
+    l.id,
+    l.status,
+    l.notes,
+    l.conversationNotes,
+    l.futurePlanNotes,
+    l.reminderKind,
+    l.nextFollowUpAt,
+    l.lastContactedAt,
+    l.name,
+    l.email,
+    l.phone,
+    l.company,
+    l.message,
+    String(l.dealValue),
+    l.priority,
+    l.tags.join("\x1f"),
+    l.submittedAt,
+    l.source,
+  ].join("\x1e");
+}
+
 function LeadDetailDialog({
   lead,
   open,
@@ -990,38 +1015,32 @@ function LeadDetailDialog({
   onPatch: (body: Record<string, unknown>) => void;
   onDelete: () => void;
 }) {
-  const [status, setStatus] = useState<LeadStatus>("new");
-  const [notes, setNotes] = useState("");
-  const [nextLocal, setNextLocal] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [company, setCompany] = useState("");
-  const [message, setMessage] = useState("");
-  const [dealValueStr, setDealValueStr] = useState("");
-  const [priority, setPriority] = useState<LeadPriority>("medium");
-  const [tagsCsv, setTagsCsv] = useState("");
-  const [conversationNotes, setConversationNotes] = useState("");
-  const [futurePlanNotes, setFuturePlanNotes] = useState("");
-  const [reminderKind, setReminderKind] = useState<LeadReminderKind | "">("");
-
-  useEffect(() => {
-    if (!lead) return;
-    setStatus(lead.status);
-    setNotes(lead.notes ?? "");
-    setConversationNotes(lead.conversationNotes ?? "");
-    setFuturePlanNotes(lead.futurePlanNotes ?? "");
-    setReminderKind(lead.reminderKind ?? "");
-    setNextLocal(isoToDatetimeLocal(lead.nextFollowUpAt));
-    setName(lead.name);
-    setEmail(lead.email);
-    setPhone(lead.phone);
-    setCompany(lead.company);
-    setMessage(lead.message);
-    setDealValueStr(lead.dealValue ? String(lead.dealValue) : "");
-    setPriority(lead.priority ?? "medium");
-    setTagsCsv((lead.tags ?? []).join(", "));
-  }, [lead]);
+  const [status, setStatus] = useState<LeadStatus>(() => lead?.status ?? "new");
+  const [notes, setNotes] = useState(() => lead?.notes ?? "");
+  const [nextLocal, setNextLocal] = useState(() =>
+    lead ? isoToDatetimeLocal(lead.nextFollowUpAt) : "",
+  );
+  const [name, setName] = useState(() => lead?.name ?? "");
+  const [email, setEmail] = useState(() => lead?.email ?? "");
+  const [phone, setPhone] = useState(() => lead?.phone ?? "");
+  const [company, setCompany] = useState(() => lead?.company ?? "");
+  const [message, setMessage] = useState(() => lead?.message ?? "");
+  const [dealValueStr, setDealValueStr] = useState(() =>
+    lead?.dealValue ? String(lead.dealValue) : "",
+  );
+  const [priority, setPriority] = useState<LeadPriority>(
+    () => lead?.priority ?? "medium",
+  );
+  const [tagsCsv, setTagsCsv] = useState(() => (lead?.tags ?? []).join(", "));
+  const [conversationNotes, setConversationNotes] = useState(
+    () => lead?.conversationNotes ?? "",
+  );
+  const [futurePlanNotes, setFuturePlanNotes] = useState(
+    () => lead?.futurePlanNotes ?? "",
+  );
+  const [reminderKind, setReminderKind] = useState<LeadReminderKind | "">(
+    () => lead?.reminderKind ?? "",
+  );
 
   if (!lead) return null;
 
