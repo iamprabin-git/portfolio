@@ -1,0 +1,134 @@
+{
+  "profile": {
+    "name": "Prabin Dangol",
+    "title": "Web Developer",
+    "bio": "I design and build fast, accessible web experiences with modern tooling. Available for freelance and full-time roles.",
+    "email": "dprabin23@gmail.com",
+    "address": "Godawari Municipality-5, Lalitpur",
+    "phone": "+9779765726294",
+    "github": "https://github.com/iamprabin-git",
+    "linkedin": "https://www.linkedin.com/in/prabin-dangol-0b4287a0/",
+    "facebook": "",
+    "instagram": "",
+    "tiktok": "",
+    "whatsapp": "+9779765726294",
+    "location": "Remote · Worldwide",
+    "logoUrl": "/uploads/1778413051716-28c4b005fb9ecc5d.png",
+    "heroImageUrl": "/uploads/1778411144609-dc5a4f3c729ab55a.jpg"
+  },
+  "projects": [
+    {
+      "id": "sample-1",
+      "title": "lele sasto ghar jagga karobar kendra",
+      "summary": "Analytics and inventory for a growing retail brand.",
+      "description": "laravel with react, shadcn ui based realetate website",
+      "imageUrl": "/uploads/1778410333302-05e7db8161e9cffa.png",
+      "tags": [
+        "Laravel",
+        "TypeScript",
+        "Tailwind CSS",
+        "Shadcn UI"
+      ],
+      "demoUrl": "https://lelesastogharjagga.com.np",
+      "repoUrl": "https://github.com",
+      "featured": true
+    }
+  ],
+  "skills": [
+    {
+      "id": "sk-1",
+      "name": "TypeScript",
+      "category": "Languages",
+      "proficiency": 70,
+      "sinceYear": 0
+    },
+    {
+      "id": "sk-2",
+      "name": "React / Next.js",
+      "category": "Frontend",
+      "proficiency": 70,
+      "sinceYear": 0
+    },
+    {
+      "id": "sk-3",
+      "name": "Node.js",
+      "category": "Backend",
+      "proficiency": 70,
+      "sinceYear": 0
+    },
+    {
+      "id": "sk-4",
+      "name": "REST & GraphQL",
+      "category": "APIs",
+      "proficiency": 70,
+      "sinceYear": 0
+    },
+    {
+      "id": "sk-5",
+      "name": "PostgreSQL",
+      "category": "Data",
+      "proficiency": 70,
+      "sinceYear": 0
+    },
+    {
+      "id": "sk-6",
+      "name": "Docker & CI/CD",
+      "category": "DevOps",
+      "proficiency": 70,
+      "sinceYear": 0
+    }
+  ],
+  "sponsors": [
+    {
+      "id": "c004c6f0-4f96-4300-b007-45d9bf988d50",
+      "name": "lele sasto gharjagga karobar",
+      "logoUrl": "/uploads/1778410404969-b498f9f602bd8232.png",
+      "websiteUrl": "https://lelesastogharjagga.com.np"
+    },
+    {
+      "id": "e0a12663-d841-47cd-9a35-f671a563cb3c",
+      "name": "lele krishi sahakari sanstha Ltd.",
+      "logoUrl": "/uploads/1778410881142-1280cb5312564559.png",
+      "websiteUrl": ""
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rv-1",
+      "authorName": "Sarah Chen",
+      "role": "Engineering Manager",
+      "company": "Northwind Labs",
+      "quote": "Shipped our MVP ahead of schedule with exceptional attention to UX and performance.",
+      "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+      "rating": 5,
+      "status": "approved",
+      "submittedAt": "1970-01-01T00:00:00.000Z",
+      "source": "admin"
+    },
+    {
+      "id": "rv-2",
+      "authorName": "Marcus Webb",
+      "role": "Founder",
+      "company": "Studio Outline",
+      "quote": "Reliable partner for our product rebuild — thoughtful architecture and fast iteration.",
+      "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80",
+      "rating": 5,
+      "status": "approved",
+      "submittedAt": "1970-01-01T00:00:00.000Z",
+      "source": "admin"
+    }
+  ],
+  "projectFeedback": [
+    {
+      "id": "8d1643e5-acbb-4e7f-a8e2-28dcd5f23dd2",
+      "projectId": "sample-1",
+      "authorName": "ran",
+      "email": "",
+      "comment": "excellent",
+      "rating": 5,
+      "status": "approved",
+      "submittedAt": "2026-05-10T10:46:13.520Z"
+    }
+  ],
+  "leads": []
+}
