@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import fs from "fs";
 import path from "path";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -48,10 +49,30 @@ export async function POST(request: Request) {
   }
 
   const buf = Buffer.from(await entry.arrayBuffer());
-  const base = `${Date.now()}-${randomBytes(8).toString("hex")}${ext}`;
+  const filename = `${Date.now()}-${randomBytes(8).toString("hex")}${ext}`;
+
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(`portfolio/${filename}`, buf, {
+      access: "public",
+      contentType: mime,
+      addRandomSuffix: false,
+    });
+    return NextResponse.json({ url: blob.url });
+  }
+
+  if (process.env.VERCEL) {
+    return NextResponse.json(
+      {
+        error:
+          "On Vercel, image uploads require Blob storage (read-only server disk). In the Vercel dashboard open Storage → Blob → create/link a store for this project (adds BLOB_READ_WRITE_TOKEN), then redeploy. Alternatively paste a full https:// image URL.",
+      },
+      { status: 503 },
+    );
+  }
+
   const dir = path.join(process.cwd(), "public", "uploads");
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, base), buf);
+  fs.writeFileSync(path.join(dir, filename), buf);
 
-  return NextResponse.json({ url: `/uploads/${base}` });
+  return NextResponse.json({ url: `/uploads/${filename}` });
 }
